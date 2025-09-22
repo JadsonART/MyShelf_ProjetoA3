@@ -1,4 +1,4 @@
-meu-projeto/
+Projeto-A3/
 │
 ├── .github/                # Configurações do GitHub
 │   ├── workflows/          # CI/CD (Actions)
