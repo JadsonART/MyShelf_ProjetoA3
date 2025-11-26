@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Login</h2>
+<form method="POST">
+  <input type="email" name="email" placeholder="Email" class="form-control mb-2" required>
+  <input type="password" name="senha" placeholder="Senha" class="form-control mb-2" required>
+  <button type="submit" class="btn btn-primary">Entrar</button>
+  <a href="{{ url_for('register') }}" class="btn btn-link">Registrar</a>
+</form>
+{% if erro %}<div class="alert alert-danger mt-2">{{ erro }}</div>{% endif %}
+{% endblock %}

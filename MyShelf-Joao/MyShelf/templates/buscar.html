@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🔍 Buscar Livros</h2>
+
+<form method="POST" class="mb-3">
+  <div class="mb-2">
+    <input type="text" name="titulo" placeholder="Título do livro" value="{{ titulo or '' }}" class="form-control">
+  </div>
+  <div class="mb-2">
+    <input type="text" name="isbn" placeholder="ISBN" value="{{ isbn or '' }}" class="form-control">
+  </div>
+  <div class="mb-2">
+    <select name="genero" class="form-select">
+      <option value="Todos" {% if genero == "Todos" or not genero %}selected{% endif %}>Todos</option>
+      {% for g in generos %}
+        <option value="{{ g }}" {% if genero == g %}selected{% endif %}>{{ g }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-2">
+    <input type="text" name="autor" placeholder="Autor" value="{{ autor or '' }}" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Buscar</button>
+  <a href="{{ url_for('buscar') }}" class="btn btn-secondary">Limpar filtros</a>
+</form>
+
+{% if resultados %}
+  <h4>Resultados:</h4>
+  <ul class="list-group">
+    {% for id, titulo, autor, genero, isbn in resultados %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ titulo }}</strong> - {{ autor }} ({{ genero }})  
+          <small>ISBN: {{ isbn }}</small>
+        </div>
+        <div>
+            <form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
+            <input type="hidden" name="livro_id" value="{{ id }}">
+            <button type="submit" class="btn btn-sm btn-success">Biblioteca</button>
+            </form>
+
+            <form method="POST" action="{{ url_for('buscar_adicionar_desejos') }}" style="display:inline;">
+            <input type="hidden" name="livro_id" value="{{ id }}">
+            <button type="submit" class="btn btn-sm btn-warning">Desejos</button>
+            </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% elif titulo or genero or isbn %}
+  <div class="alert alert-info mt-3">Nenhum livro encontrado com esses critérios.</div>
+{% endif %}
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-info mt-3">Ir para o menu princípal</a>
+<a href="{{ url_for('catalogo') }}" class="btn btn-secondary mt-3">Ir para o catálogo</a>
+{% endblock %}
+
+<form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
+  <input type="hidden" name="livro_id" value="{{ id }}">
+  <!-- preservar filtros -->
+  <input type="hidden" name="titulo" value="{{ titulo or '' }}">
+  <input type="hidden" name="isbn" value="{{ isbn or '' }}">
+  <input type="hidden" name="genero" value="{{ genero or '' }}">
+  <input type="hidden" name="autor" value="{{ autor or '' }}">
+  <button type="submit" class="btn btn-sm btn-success">Biblioteca</button>
+</form>
+
+<form method="POST" action="{{ url_for('buscar_adicionar_desejos') }}" style="display:inline;">
+  <input type="hidden" name="livro_id" value="{{ id }}">
+  <!-- preservar filtros -->
+  <input type="hidden" name="titulo" value="{{ titulo or '' }}">
+  <input type="hidden" name="isbn" value="{{ isbn or '' }}">
+  <input type="hidden" name="genero" value="{{ genero or '' }}">
+  <input type="hidden" name="autor" value="{{ autor or '' }}">
+  <button type="submit" class="btn btn-sm btn-warning">Desejos</button>
+</form>

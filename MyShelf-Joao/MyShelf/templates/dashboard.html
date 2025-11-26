@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📊 Minha Estante</h2>
+
+<div class="row">
+  <div class="col-md-3">
+    <div class="card text-center bg-primary text-white mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Biblioteca</h5>
+        <p class="card-text">{{ total_biblioteca }}</p>
+        <a href="{{ url_for('biblioteca') }}" class="btn btn-light">Ver Biblioteca</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-center bg-warning mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Lendo Agora</h5>
+        <p class="card-text">{{ total_lendo }}</p>
+        <a href="{{ url_for('biblioteca') }}" class="btn btn-light">Gerenciar</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-center bg-success text-white mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Já Lidos</h5>
+        <p class="card-text">{{ total_lidos }}</p>
+        <a href="{{ url_for('biblioteca') }}" class="btn btn-light">Ver Biblioteca</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-center bg-info text-white mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Lista de Desejos</h5>
+        <p class="card-text">{{ total_desejos }}</p>
+        <a href="{{ url_for('desejos') }}" class="btn btn-light">Ver Desejos</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="{{ url_for('buscar') }}" class="btn btn-dark mt-3">Buscar Livros</a>
+<a href="{{ url_for('catalogo') }}" class="btn btn-secondary mt-3">Ir para Catálogo</a>
+<a href="{{ url_for('logout') }}" class="btn btn-danger mt-3">Sair</a>
+{% endblock %}
