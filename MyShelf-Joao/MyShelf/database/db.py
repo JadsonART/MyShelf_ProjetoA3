@@ -16,7 +16,8 @@ def criar_tabelas():
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    senha TEXT NOT NULL
+    senha TEXT NOT NULL,
+    generos_preferidos TEXT
     )
     """)
 
@@ -27,6 +28,7 @@ def criar_tabelas():
     autor TEXT NOT NULL,
     genero TEXT,
     isbn TEXT,
+    capa TEXT,
     UNIQUE(titulo, autor)
     )
     """)
@@ -60,12 +62,12 @@ def criar_tabelas():
     conn.commit()
     conn.close()
 
-def inserir_usuario(nome, email, senha, telefone=None):
+def inserir_usuario(nome, email, senha):
     conn = conectar()
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO usuarios (nome, email, senha, telefone) VALUES (?, ?, ?, ?)",
-        (nome, email, senha, telefone)
+        "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
+        (nome, email, senha)
     )
     conn.commit()
     user_id = cur.lastrowid
@@ -75,7 +77,60 @@ def inserir_usuario(nome, email, senha, telefone=None):
 def buscar_usuario_por_email(email):
     conn = conectar()
     cur = conn.cursor()
-    cur.execute("SELECT id, nome, email, senha, telefone FROM usuarios WHERE email = ?", (email,))
+    cur.execute("SELECT id, nome, email, senha, generos_preferidos FROM usuarios WHERE email = ?", (email,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+def buscar_usuario_por_id(usuario_id):
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT id, nome, email, senha, generos_preferidos FROM usuarios WHERE id = ?", (usuario_id,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+def atualizar_usuario(usuario_id, nome, email, senha, generos_preferidos=None):
+    """Atualiza informações do usuário"""
+    conn = conectar()
+    cur = conn.cursor()
+    
+    generos_str = ",".join(generos_preferidos) if generos_preferidos else None
+    
+    cur.execute("""
+        UPDATE usuarios 
+        SET nome = ?, email = ?, senha = ?, generos_preferidos = ?
+        WHERE id = ?
+    """, (nome, email, senha, generos_str, usuario_id))
+    
+    conn.commit()
+    conn.close()
+
+def obter_generos_preferidos(usuario_id):
+    """Obtém os gêneros preferidos do usuário"""
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT generos_preferidos FROM usuarios WHERE id = ?", (usuario_id,))
+    row = cur.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        return row[0].split(",")
+    return []
+
+def atualizar_capa_livro(livro_id, url_capa):
+    """Atualiza a URL da capa de um livro"""
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("UPDATE livros SET capa = ? WHERE id = ?", (url_capa, livro_id))
+    conn.commit()
+    conn.close()
+
+def obter_livro_completo(livro_id):
+    """Obtém informações completas do livro incluindo capa"""
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT id, titulo, autor, genero, isbn, capa FROM livros WHERE id = ?", (livro_id,))
     row = cur.fetchone()
     conn.close()
     return row
@@ -136,10 +191,10 @@ def inserir_livros_iniciais():
     cur = conn.cursor()
 
     livros_iniciais = [
-        ("O Hobbit", "J.R.R. Tolkien", "Fantasia", "978-8595084742"),
-        ("Sapiens", "Yuval Noah Harari", "História", "978-8543801570"),
-        ("Clean Code", "Robert C. Martin", "Tecnologia", "978-0132350884"),
-        ("Hábitos Atômicos", "James Clear", "Desenvolvimento Pessoal", "978-8550807562"),
+        ("O Hobbit", "J.R.R. Tolkien", "Fantasia", "9788595084742"),
+        ("Sapiens", "Yuval Noah Harari", "História", "9788543801570"),
+        ("Clean Code", "Robert C. Martin", "Tecnologia", "9780132350884"),
+        ("Hábitos Atômicos", "James Clear", "Desenvolvimento Pessoal", "9788550807562"),
         ("Dom Casmurro", "Machado de Assis", "Literatura Brasileira", "9788525044648"),
         ("1984", "George Orwell", "Ficção", "9788535914849"),
         ("A Revolução dos Bichos", "George Orwell", "Ficção", "9788535909555"),

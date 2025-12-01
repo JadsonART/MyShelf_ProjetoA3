@@ -1,8 +1,7 @@
-from flask import flash, Flask, request, jsonify, render_template, redirect, url_for, session
-import tkinter as tk
-from database.db import criar_tabelas, inserir_livros_iniciais, conectar
-from services.auth_service import AuthService
-from services.biblioteca_service import BibliotecaService
+from flask import flash, Flask, request, render_template, redirect, url_for, session
+from database.db import criar_tabelas, inserir_livros_iniciais, conectar, buscar_usuario_por_id, atualizar_usuario, obter_generos_preferidos, atualizar_capa_livro, obter_livro_completo
+from services.recomendacao_service import RecomendacaoService
+from services.capa_livro_service import BookCoverService
 
 
 app = Flask(__name__)
@@ -358,6 +357,84 @@ def buscar():
                            generos=generos)
 
 
+# Recomendações de livros
+
+@app.route("/recomendacoes")
+def recomendacoes():
+    usuario_id = session.get("usuario_id")
+    if not usuario_id:
+        return redirect(url_for("login"))
+    
+    # Obter recomendações personalizadas
+    recomendacoes_lista = RecomendacaoService.obter_recomendacoes_personalizadas(usuario_id, limite=15)
+    generos_favoritos = RecomendacaoService.obter_generos_favoritos(usuario_id)
+    generos_preferidos = obter_generos_preferidos(usuario_id)
+    
+    return render_template("recomendacoes.html", 
+                         recomendacoes=recomendacoes_lista,
+                         generos_favoritos=generos_favoritos,
+                         generos_preferidos=generos_preferidos)
+
+
+@app.route("/recomendacoes/adicionar_biblioteca", methods=["POST"])
+def recomendacoes_adicionar_biblioteca():
+    usuario_id = session.get("usuario_id")
+    if not usuario_id:
+        return redirect(url_for("login"))
+
+    livro_id = request.form["livro_id"]
+
+    conn = conectar()
+    cur = conn.cursor()
+
+    # Verifica se já existe
+    cur.execute("SELECT 1 FROM biblioteca WHERE usuario_id = ? AND livro_id = ?", (usuario_id, livro_id))
+    existe = cur.fetchone()
+
+    if existe:
+        cur.execute("SELECT titulo FROM livros WHERE id = ?", (livro_id,))
+        livro = cur.fetchone()
+        flash(f'O livro "{livro[0]}" já está na sua biblioteca!', "warning")
+    else:
+        cur.execute("INSERT INTO biblioteca (usuario_id, livro_id) VALUES (?, ?)", (usuario_id, livro_id))
+        conn.commit()
+        cur.execute("SELECT titulo FROM livros WHERE id = ?", (livro_id,))
+        livro = cur.fetchone()
+        flash(f'O livro "{livro[0]}" foi adicionado à sua biblioteca!', "success")
+
+    conn.close()
+    return redirect(url_for("recomendacoes"))
+
+
+@app.route("/recomendacoes/adicionar_desejos", methods=["POST"])
+def recomendacoes_adicionar_desejos():
+    usuario_id = session.get("usuario_id")
+    if not usuario_id:
+        return redirect(url_for("login"))
+
+    livro_id = request.form["livro_id"]
+
+    conn = conectar()
+    cur = conn.cursor()
+
+    cur.execute("SELECT 1 FROM lista_desejos WHERE usuario_id = ? AND livro_id = ?", (usuario_id, livro_id))
+    existe = cur.fetchone()
+
+    if existe:
+        cur.execute("SELECT titulo FROM livros WHERE id = ?", (livro_id,))
+        livro = cur.fetchone()
+        flash(f'O livro "{livro[0]}" já está na sua lista de desejos!', "warning")
+    else:
+        cur.execute("INSERT INTO lista_desejos (usuario_id, livro_id) VALUES (?, ?)", (usuario_id, livro_id))
+        conn.commit()
+        cur.execute("SELECT titulo FROM livros WHERE id = ?", (livro_id,))
+        livro = cur.fetchone()
+        flash(f'O livro "{livro[0]}" foi adicionado à sua lista de desejos!', "success")
+
+    conn.close()
+    return redirect(url_for("recomendacoes"))
+
+
 @app.route("/buscar/adicionar_biblioteca", methods=["POST"])
 def buscar_adicionar_biblioteca():
     usuario_id = session.get("usuario_id")
@@ -419,6 +496,97 @@ def buscar_adicionar_desejos():
 
     # Volta para a aba de busca
     return redirect(url_for("buscar"))
+
+                           
+# Perfil do usuário
+
+@app.route("/perfil", methods=["GET", "POST"])
+def perfil():
+    usuario_id = session.get("usuario_id")
+    if not usuario_id:
+        return redirect(url_for("login"))
+    
+    usuario = buscar_usuario_por_id(usuario_id)
+    if not usuario:
+        return redirect(url_for("login"))
+    
+    id_, nome, email, senha, generos_str = usuario
+    generos_selecionados = obter_generos_preferidos(usuario_id)
+    
+    # Buscar todos os gêneros disponíveis
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT genero FROM livros ORDER BY genero")
+    todos_generos = [row[0] for row in cur.fetchall()]
+    conn.close()
+    
+    erro = None
+    sucesso = None
+    
+    if request.method == "POST":
+        novo_nome = request.form.get("nome", "").strip()
+        novo_email = request.form.get("email", "").strip()
+        nova_senha = request.form.get("senha", "").strip()
+        generos_favoritos = request.form.getlist("generos")
+        
+        # Validações
+        if not novo_nome:
+            erro = "Nome não pode estar vazio"
+        elif not novo_email:
+            erro = "Email não pode estar vazio"
+        elif not nova_senha:
+            erro = "Senha não pode estar vazia"
+        else:
+            try:
+                atualizar_usuario(usuario_id, novo_nome, novo_email, nova_senha, generos_favoritos)
+                sucesso = "Perfil atualizado com sucesso!"
+                nome = novo_nome
+                email = novo_email
+                senha = nova_senha
+                generos_selecionados = generos_favoritos
+            except Exception as e:
+                erro = f"Erro ao atualizar: {str(e)}"
+    
+    return render_template("perfil.html",
+                         nome=nome,
+                         email=email,
+                         todos_generos=todos_generos,
+                         generos_selecionados=generos_selecionados,
+                         erro=erro,
+                         sucesso=sucesso)
+
+                           
+# Helper para obter URL de capa
+@app.context_processor
+def utility_processor():
+    def obter_url_capa(livro_id, titulo, autor, isbn):
+        """
+        Retorna URL da capa de um livro.
+        Tenta: banco de dados → API de capas → ícone padrão
+        """
+        try:
+            # 1. Tenta buscar do banco de dados
+            livro = obter_livro_completo(livro_id)
+            if livro and livro[5]:  # índice 5 = capa
+                return livro[5]
+            
+            # 2. Tenta buscar via API
+            url_capa = BookCoverService.obter_capa(isbn=isbn, titulo=titulo, autor=autor)
+            
+            if url_capa:
+                # Atualiza no banco para próximas vezes
+                try:
+                    atualizar_capa_livro(livro_id, url_capa)
+                except:
+                    pass  # Falha silenciosa
+                return url_capa
+        except Exception as e:
+            print(f"Erro ao obter capa: {e}")
+        
+        # 3. Retorna ícone padrão
+        return None
+    
+    return dict(obter_url_capa=obter_url_capa)
 
                            
 # Rota de logout    

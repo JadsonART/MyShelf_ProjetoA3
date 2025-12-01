@@ -26,34 +26,72 @@
 </form>
 
 {% if resultados %}
-  <h4>Resultados:</h4>
-  <ul class="list-group">
+  <h4 class="mb-3">📚 Resultados ({{ resultados|length }} livros encontrados)</h4>
+  <div class="row">
     {% for id, titulo, autor, genero, isbn in resultados %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <strong>{{ titulo }}</strong> - {{ autor }} ({{ genero }})  
-          <small>ISBN: {{ isbn }}</small>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm hover-card" style="cursor: pointer; transition: transform 0.2s;">
+          <!-- Capa do Livro -->
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center capa-livro" 
+               style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 48px; display: flex; align-items: center; justify-content: center;">
+            {% set url_capa = obter_url_capa(id, titulo, autor, isbn or '') %}
+            {% if url_capa %}
+              <img src="{{ url_capa }}" alt="{{ titulo }}" class="img-cover" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
+            {% else %}
+              📖
+            {% endif %}
+          </div>
+          
+          <div class="card-body d-flex flex-column">
+            <!-- Título -->
+            <h5 class="card-title" title="{{ titulo }}">{{ titulo[:30] }}{% if titulo|length > 30 %}...{% endif %}</h5>
+            
+            <!-- Autor -->
+            <p class="card-text text-muted small">
+              <strong>Autor:</strong> {{ autor[:25] }}{% if autor|length > 25 %}...{% endif %}
+            </p>
+            
+            <!-- Gênero -->
+            <p class="card-text">
+              <span class="badge bg-primary">{{ genero }}</span>
+            </p>
+            
+            <!-- ISBN -->
+            {% if isbn %}
+            <p class="card-text small text-muted">
+              <strong>ISBN:</strong> {{ isbn }}
+            </p>
+            {% endif %}
+            
+            <!-- Botões -->
+            <div class="mt-auto d-grid gap-2">
+              <form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
+                <input type="hidden" name="livro_id" value="{{ id }}">
+                <button type="submit" class="btn btn-sm btn-success w-100">📖 Biblioteca</button>
+              </form>
+              <form method="POST" action="{{ url_for('buscar_adicionar_desejos') }}" style="display:inline;">
+                <input type="hidden" name="livro_id" value="{{ id }}">
+                <button type="submit" class="btn btn-sm btn-warning w-100">❤️ Desejos</button>
+              </form>
+            </div>
+          </div>
         </div>
-        <div>
-            <form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
-            <input type="hidden" name="livro_id" value="{{ id }}">
-            <button type="submit" class="btn btn-sm btn-success">Biblioteca</button>
-            </form>
-
-            <form method="POST" action="{{ url_for('buscar_adicionar_desejos') }}" style="display:inline;">
-            <input type="hidden" name="livro_id" value="{{ id }}">
-            <button type="submit" class="btn btn-sm btn-warning">Desejos</button>
-            </form>
-        </div>
-      </li>
+      </div>
     {% endfor %}
-  </ul>
-{% elif titulo or genero or isbn %}
-  <div class="alert alert-info mt-3">Nenhum livro encontrado com esses critérios.</div>
+  </div>
+{% elif titulo or genero or isbn or autor %}
+  <div class="alert alert-info mt-3">
+    <strong>ℹ️ Nenhum livro encontrado</strong> com esses critérios de busca.
+  </div>
 {% endif %}
 
-<a href="{{ url_for('dashboard') }}" class="btn btn-info mt-3">Ir para o menu princípal</a>
-<a href="{{ url_for('catalogo') }}" class="btn btn-secondary mt-3">Ir para o catálogo</a>
+<style>
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2) !important;
+  }
+</style>
+
 {% endblock %}
 
 <form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
