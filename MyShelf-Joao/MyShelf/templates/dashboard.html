@@ -1,46 +1,85 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>📊 Minha Estante</h2>
-
-<div class="row">
-  <div class="col-md-3">
-    <div class="card text-center bg-primary text-white mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Biblioteca</h5>
-        <p class="card-text">{{ total_biblioteca }}</p>
-        <a href="{{ url_for('biblioteca') }}" class="btn btn-light">Ver Biblioteca</a>
+<div class="container py-3">
+  <h2 class="mb-4 text-center" style="font-size:2.2rem; font-weight:700; letter-spacing:1px; color:#7c5c3e; font-family:'Segoe UI',sans-serif;">
+    📊 Minha Estante
+  </h2>
+  <div class="row justify-content-center">
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card stat-card border-0 shadow-sm" style="border-radius:18px; background:#f8f6f3;">
+        <div class="card-body text-center">
+          <div style="font-size:2.2rem; color:#a88a6d;">📖</div>
+          <h5 class="card-title mb-2" style="color:#7c5c3e; font-weight:600; font-family:'Segoe UI',sans-serif;">Biblioteca</h5>
+          <div class="stat-number" style="font-size:2.1rem; font-weight:700; color:#a88a6d;">{{ total_biblioteca }}</div>
+          <a href="{{ url_for('biblioteca') }}" class="btn btn-terra btn-anim mt-2">Ver Biblioteca</a>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="card text-center bg-warning mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Lendo Agora</h5>
-        <p class="card-text">{{ total_lendo }}</p>
-        <a href="{{ url_for('biblioteca') }}" class="btn btn-light">Gerenciar</a>
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card stat-card border-0 shadow-sm" style="border-radius:18px; background:#f8f6f3;">
+        <div class="card-body text-center">
+          <div style="font-size:2.2rem; color:#a88a6d;">⏳</div>
+          <h5 class="card-title mb-2" style="color:#7c5c3e; font-weight:600; font-family:'Segoe UI',sans-serif;">Lendo Agora</h5>
+          <div class="stat-number" style="font-size:2.1rem; font-weight:700; color:#a88a6d;">{{ total_lendo }}</div>
+          <a href="{{ url_for('biblioteca') }}" class="btn btn-terra btn-anim mt-2">Gerenciar</a>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="card text-center bg-success text-white mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Já Lidos</h5>
-        <p class="card-text">{{ total_lidos }}</p>
-        <a href="{{ url_for('biblioteca') }}" class="btn btn-light">Ver Biblioteca</a>
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card stat-card border-0 shadow-sm" style="border-radius:18px; background:#f8f6f3;">
+        <div class="card-body text-center">
+          <div style="font-size:2.2rem; color:#a88a6d;">✅</div>
+          <h5 class="card-title mb-2" style="color:#7c5c3e; font-weight:600; font-family:'Segoe UI',sans-serif;">Já Lidos</h5>
+          <div class="stat-number" style="font-size:2.1rem; font-weight:700; color:#a88a6d;">{{ total_lidos }}</div>
+          <a href="{{ url_for('biblioteca') }}" class="btn btn-terra btn-anim mt-2">Ver Biblioteca</a>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="card text-center bg-info text-white mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Lista de Desejos</h5>
-        <p class="card-text">{{ total_desejos }}</p>
-        <a href="{{ url_for('desejos') }}" class="btn btn-light">Ver Desejos</a>
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card stat-card border-0 shadow-sm" style="border-radius:18px; background:#f8f6f3;">
+        <div class="card-body text-center">
+          <div style="font-size:2.2rem; color:#a88a6d;">❤️</div>
+          <h5 class="card-title mb-2" style="color:#7c5c3e; font-weight:600; font-family:'Segoe UI',sans-serif;">Lista de Desejos</h5>
+          <div class="stat-number" style="font-size:2.1rem; font-weight:700; color:#a88a6d;">{{ total_desejos }}</div>
+          <a href="{{ url_for('desejos') }}" class="btn btn-terra btn-anim mt-2">Ver Desejos</a>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  body {
+    background: #f8f6f3;
+    font-family: 'Segoe UI',sans-serif;
+  }
+  .stat-card {
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .stat-card:hover {
+    transform: translateY(-7px) scale(1.03);
+    box-shadow: 0 12px 24px rgba(124,92,62,0.13) !important;
+  }
+  .btn-anim {
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    font-family: 'Segoe UI',sans-serif;
+  }
+  .btn-anim:hover {
+    box-shadow: 0 2px 8px rgba(124,92,62,0.10);
+    filter: brightness(1.08);
+  }
+  .btn-terra {
+    background: #a88a6d;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    font-family: 'Segoe UI',sans-serif;
+  }
+  .btn-terra:hover {
+    background: #7c5c3e;
+    color: #fff;
+  }
+</style>
 {% endblock %}
