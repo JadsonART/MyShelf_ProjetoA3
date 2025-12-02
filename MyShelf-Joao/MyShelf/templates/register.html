@@ -1,0 +1,75 @@
+{% extends "base_sem_aba_lateral.html" %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh; background: #f8f6f3;">
+  <div class="col-md-5 col-sm-8">
+    <!-- Logo -->
+    <div class="text-center mb-4">
+      <img src="{{ url_for('static', filename='MYbook.png') }}" alt="MyShelf Logo" style="max-width: 180px; height: auto; margin-bottom: 20px;">
+    </div>
+
+    <!-- Card de Registro -->
+    <div class="card border-0 shadow-lg" style="border-radius: 18px; background: #f8f6f3;">
+      <div class="card-body p-4">
+        <h2 class="text-center mb-4" style="font-size: 1.8rem; font-weight: 700; color: #7c5c3e; font-family: 'Segoe UI', sans-serif;">Criar Nova Conta</h2>
+        
+        <form method="POST">
+          <div class="mb-3">
+            <label for="nome" class="form-label" style="color: #7c5c3e; font-weight: 500; font-family: 'Segoe UI', sans-serif;">Nome</label>
+            <input type="text" name="nome" id="nome" placeholder="Seu nome completo" class="form-control input-custom mb-2" required style="border: 2px solid #e7dfd7; border-radius: 10px; padding: 12px; background: #fff; color: #7c5c3e; font-family: 'Segoe UI', sans-serif;">
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label" style="color: #7c5c3e; font-weight: 500; font-family: 'Segoe UI', sans-serif;">Email</label>
+            <input type="email" name="email" id="email" placeholder="seu@email.com" class="form-control input-custom mb-2" required style="border: 2px solid #e7dfd7; border-radius: 10px; padding: 12px; background: #fff; color: #7c5c3e; font-family: 'Segoe UI', sans-serif;">
+          </div>
+          
+          <div class="mb-4">
+            <label for="senha" class="form-label" style="color: #7c5c3e; font-weight: 500; font-family: 'Segoe UI', sans-serif;">Senha</label>
+            <input type="password" name="senha" id="senha" placeholder="Crie uma senha segura" class="form-control input-custom mb-2" required style="border: 2px solid #e7dfd7; border-radius: 10px; padding: 12px; background: #fff; color: #7c5c3e; font-family: 'Segoe UI', sans-serif;">
+          </div>
+          
+          <button type="submit" class="btn btn-terra btn-anim w-100 mb-2" style="background: #a88a6d; color: #fff; font-weight: 600; padding: 12px; border-radius: 10px; border: none; font-size: 1.05rem; font-family: 'Segoe UI', sans-serif; transition: all 0.3s;">Registrar</button>
+        </form>
+        
+        <div class="text-center mt-3">
+          <p style="color: #a88a6d; font-family: 'Segoe UI', sans-serif;">Já tem conta? <a href="{{ url_for('login') }}" style="color: #7c5c3e; font-weight: 600; text-decoration: none;">Faça login aqui</a></p>
+        </div>
+      </div>
+    </div>
+
+    {% if erro %}
+      <div class="alert alert-danger mt-3" style="border-radius: 10px; background: #f8d7da; border: 2px solid #f5c6cb; color: #721c24; font-family: 'Segoe UI', sans-serif;">
+        <strong>Erro:</strong> {{ erro }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  body {
+    background: #f8f6f3;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .input-custom:focus {
+    border-color: #a88a6d !important;
+    box-shadow: 0 0 0 0.2rem rgba(168, 138, 109, 0.15) !important;
+    outline: none;
+  }
+  .btn-terra {
+    background: #a88a6d;
+    color: #fff;
+    transition: all 0.3s;
+  }
+  .btn-terra:hover {
+    background: #7c5c3e;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(124, 92, 62, 0.2);
+  }
+  .btn-anim {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-anim:active {
+    transform: scale(0.98);
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-3">
+  <h2 class="mb-4 text-center" style="font-size:2.2rem; font-weight:700; letter-spacing:1px; color:#7c5c3e; font-family:'Segoe UI',sans-serif;">
+    📚 Catálogo de Livros
+  </h2>
+  <div class="row">
+    {% for id, titulo, autor, genero in livros %}
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm hover-card border-0" style="border-radius:18px; overflow:hidden; background:#f8f6f3;">
+          <!-- Capa do Livro -->
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative capa-livro"
+               style="height: 200px; background: linear-gradient(135deg, #e7dfd7 0%, #f8f6f3 100%); color: #a88a6d; font-size: 48px; display: flex; align-items: center; justify-content: center;">
+            {% set url_capa = obter_url_capa(id, titulo, autor, '') %}
+            {% if url_capa %}
+              <img src="{{ url_capa }}" alt="{{ titulo }}" class="img-cover" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px 8px 0 0;">
+            {% else %}
+              📖
+            {% endif %}
+          </div>
+          <div class="card-body d-flex flex-column" style="background: #f8f6f3;">
+            <h5 class="card-title mb-2" style="font-size:1.15rem; font-weight:600; color:#7c5c3e; font-family:'Segoe UI',sans-serif;" title="{{ titulo }}">{{ titulo[:30] }}{% if titulo|length > 30 %}...{% endif %}</h5>
+            <p class="card-text text-muted small mb-1" style="color:#a88a6d;">
+              <strong>Autor:</strong> {{ autor[:25] }}{% if autor|length > 25 %}...{% endif %}
+            </p>
+            <p class="card-text mb-2">
+              <span class="badge badge-terra" style="background:#e7dfd7; color:#7c5c3e; font-size:0.95em; font-family:'Segoe UI',sans-serif; border-radius:8px; padding:0.45em 1em;">{{ genero }}</span>
+            </p>
+            <div class="mt-auto d-grid gap-2">
+              <form method="POST" action="{{ url_for('adicionar_livro') }}" style="display:inline;">
+                <input type="hidden" name="livro_id" value="{{ id }}">
+                <button type="submit" class="btn btn-sm btn-terra w-100 btn-anim">📖 Biblioteca</button>
+              </form>
+              <form method="POST" action="{{ url_for('desejos') }}" style="display:inline;">
+                <input type="hidden" name="livro_id" value="{{ id }}">
+                <button type="submit" class="btn btn-sm btn-terra w-100 btn-anim">❤️ Desejos</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  body {
+    background: #f8f6f3;
+    font-family: 'Segoe UI',sans-serif;
+  }
+  .hover-card {
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .hover-card:hover {
+    transform: translateY(-7px) scale(1.03);
+    box-shadow: 0 12px 24px rgba(124,92,62,0.13) !important;
+  }
+  .btn-anim {
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    font-family: 'Segoe UI',sans-serif;
+  }
+  .btn-anim:hover {
+    box-shadow: 0 2px 8px rgba(124,92,62,0.10);
+    filter: brightness(1.08);
+  }
+  .btn-terra {
+    background: #a88a6d;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    font-family: 'Segoe UI',sans-serif;
+  }
+  .btn-terra:hover {
+    background: #7c5c3e;
+    color: #fff;
+  }
+  .badge-terra {
+    background: #e7dfd7!important;
+    color: #7c5c3e!important;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.45em 1em;
+  }
+</style>
+{% endblock %}

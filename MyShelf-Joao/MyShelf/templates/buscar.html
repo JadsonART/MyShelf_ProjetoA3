@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🔍 Buscar Livros</h2>
+
+<form method="POST" class="mb-3">
+  <div class="mb-2">
+    <input type="text" name="titulo" placeholder="Título do livro" value="{{ titulo or '' }}" class="form-control">
+  </div>
+  <div class="mb-2">
+    <input type="text" name="isbn" placeholder="ISBN" value="{{ isbn or '' }}" class="form-control">
+  </div>
+  <div class="mb-2">
+    <select name="genero" class="form-select">
+      <option value="Todos" {% if genero == "Todos" or not genero %}selected{% endif %}>Todos</option>
+      {% for g in generos %}
+        <option value="{{ g }}" {% if genero == g %}selected{% endif %}>{{ g }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-2">
+    <input type="text" name="autor" placeholder="Autor" value="{{ autor or '' }}" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Buscar</button>
+  <a href="{{ url_for('buscar') }}" class="btn btn-secondary">Limpar filtros</a>
+</form>
+
+{% if resultados %}
+  <h4 class="mb-3">📚 Resultados ({{ resultados|length }} livros encontrados)</h4>
+  <div class="row">
+    {% for id, titulo, autor, genero, isbn in resultados %}
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm hover-card" style="cursor: pointer; transition: transform 0.2s;">
+          <!-- Capa do Livro -->
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center capa-livro" 
+               style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 48px; display: flex; align-items: center; justify-content: center;">
+            {% set url_capa = obter_url_capa(id, titulo, autor, isbn or '') %}
+            {% if url_capa %}
+              <img src="{{ url_capa }}" alt="{{ titulo }}" class="img-cover" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; this.parentElement.innerHTML='📖';">
+            {% else %}
+              📖
+            {% endif %}
+          </div>
+          
+          <div class="card-body d-flex flex-column">
+            <!-- Título -->
+            <h5 class="card-title" title="{{ titulo }}">{{ titulo[:30] }}{% if titulo|length > 30 %}...{% endif %}</h5>
+            
+            <!-- Autor -->
+            <p class="card-text text-muted small">
+              <strong>Autor:</strong> {{ autor[:25] }}{% if autor|length > 25 %}...{% endif %}
+            </p>
+            
+            <!-- Gênero -->
+            <p class="card-text">
+              <span class="badge bg-primary">{{ genero }}</span>
+            </p>
+            
+            <!-- ISBN -->
+            {% if isbn %}
+            <p class="card-text small text-muted">
+              <strong>ISBN:</strong> {{ isbn }}
+            </p>
+            {% endif %}
+            
+            <!-- Botões -->
+            <div class="mt-auto d-grid gap-2">
+              <form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
+                <input type="hidden" name="livro_id" value="{{ id }}">
+                <button type="submit" class="btn btn-sm btn-success w-100">📖 Biblioteca</button>
+              </form>
+              <form method="POST" action="{{ url_for('buscar_adicionar_desejos') }}" style="display:inline;">
+                <input type="hidden" name="livro_id" value="{{ id }}">
+                <button type="submit" class="btn btn-sm btn-warning w-100">❤️ Desejos</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% elif titulo or genero or isbn or autor %}
+  <div class="alert alert-info mt-3">
+    <strong>ℹ️ Nenhum livro encontrado</strong> com esses critérios de busca.
+  </div>
+{% endif %}
+
+<style>
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2) !important;
+  }
+</style>
+
+{% endblock %}
+
+<form method="POST" action="{{ url_for('buscar_adicionar_biblioteca') }}" style="display:inline;">
+  <input type="hidden" name="livro_id" value="{{ id }}">
+  <!-- preservar filtros -->
+  <input type="hidden" name="titulo" value="{{ titulo or '' }}">
+  <input type="hidden" name="isbn" value="{{ isbn or '' }}">
+  <input type="hidden" name="genero" value="{{ genero or '' }}">
+  <input type="hidden" name="autor" value="{{ autor or '' }}">
+  <button type="submit" class="btn btn-sm btn-success">Biblioteca</button>
+</form>
+
+<form method="POST" action="{{ url_for('buscar_adicionar_desejos') }}" style="display:inline;">
+  <input type="hidden" name="livro_id" value="{{ id }}">
+  <!-- preservar filtros -->
+  <input type="hidden" name="titulo" value="{{ titulo or '' }}">
+  <input type="hidden" name="isbn" value="{{ isbn or '' }}">
+  <input type="hidden" name="genero" value="{{ genero or '' }}">
+  <input type="hidden" name="autor" value="{{ autor or '' }}">
+  <button type="submit" class="btn btn-sm btn-warning">Desejos</button>
+</form>
